@@ -1,119 +1,140 @@
 package appender;
 
-import java.io.Serializable;
-
-
- 
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
-
 import org.apache.log4j.*;
 import org.apache.log4j.spi.LoggingEvent;
 
+public class MemAppender extends AppenderSkeleton {
 
-public class MemAppender extends AppenderSkeleton
-{
-    private static int maxSize = 100;
-    private static long discardedLogsCount = 0;
-    private static List<LoggingEvent> LoggingEvents;
+    private static int maxSize;
+    private static long discardedLogsCount;
+    private static List<LoggingEvent> loggingEvents;
     private static Layout layout;
     
-    private static MemAppender instance = new MemAppender();
+    private static MemAppender instance;
 
-    public static MemAppender getInstance() {
-        return instance;
+
+    // Default private constructor for singleton
+    private MemAppender() {
+        maxSize = 100;
+        discardedLogsCount = 0;
+        loggingEvents = new ArrayList<>();
     }
 
-    private MemAppender() throws IllegalCallerException {
-        if(instance != null) {
-            throw new IllegalCallerException("MemAppender instance already exists!");
+
+    /* 
+    #####################
+     Getters and Setters 
+    #####################
+    */ 
+
+    public static MemAppender getInstance() {
+        if (instance == null) {
+            instance = new MemAppender();
         }
+        return instance;
     }
     
     public static void setMaxSize(int maxSize) {
         MemAppender.maxSize = maxSize;
     }
-
     public static int getMaxSize() {
         return maxSize;
     }
-
+    
+    public static void setLoggingEvents(List<LoggingEvent> events) {
+        loggingEvents = events;
+        resetDiscardedLogsCount();
+    }
+    public static List<LoggingEvent> getLoggingEvents() {
+        return loggingEvents;
+    }
+    
     public static long getDiscardedLogsCount() {
         return discardedLogsCount;
     }
-    
-    private static void setDiscardedLogsCount(long newCount) {
-        MemAppender.discardedLogsCount = newCount;
+
+    public static List<LoggingEvent> getCurrentLogs() {
+        if (loggingEvents == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(loggingEvents);
     }
+
+    /* 
+    ###############
+     Other Methods 
+    ###############
+    */ 
 
     public static void resetDiscardedLogsCount() {
-        setDiscardedLogsCount(0);
+        discardedLogsCount = 0;
     }
 
-    public static void setLoggingEvents(List<LoggingEvent> LoggingEvents) {
-        MemAppender.LoggingEvents = LoggingEvents;
-    }
+    public static void addLoggingEvent(LoggingEvent event) {
+        // Possibly add check here for loggingEvents being null
 
-    public static List<LoggingEvent> getLoggingEvents() {
-        return LoggingEvents;
-    }
-
-
-    public static void addLoggingEvent(LoggingEvent LoggingEvent) {
-        if(LoggingEvents.size() >= maxSize) {
-            // Remove oldest log event and count as discarded
-            LoggingEvents.remove(0);
+        if (loggingEvents.size() >= maxSize) {
+            loggingEvents.remove(0);
             discardedLogsCount++;
         }
-        LoggingEvents.add(LoggingEvent);
+        loggingEvents.add(event);
     }
 
-    // Not sure if needs to check for null List
-    public static List<LoggingEvent> getCurrentLogs() {
-        return Collections.unmodifiableList(LoggingEvents);
+    /**
+     * @brief Print logs to console using the current layout & clear stored logs
+     * @throws IllegalStateException if layout is not set
+     */
+    public static void printLogs() throws IllegalStateException{
+        if (layout == null) {
+            throw new IllegalStateException("Layout is not set");
+        }
+        for (LoggingEvent event : loggingEvents) {
+            System.out.println(layout.format(event));
+        }
+        loggingEvents.clear();
     }
 
+    /**
+     * Get formatted event strings using the current layout.
+     * @return unmodifiableList of formatted event strings
+     * @throws IllegalStateException if layout is not set
+     */
     public static List<String> getEventStrings() throws IllegalStateException {
         if (layout == null) {
             throw new IllegalStateException("Layout is not set");
         }
         List<String> eventStrings = new ArrayList<>();
-        for (LoggingEvent event : LoggingEvents) {
-            eventStrings.add("layout.toSerializable(event).toString()");
+        for (LoggingEvent event : loggingEvents) {
+            eventStrings.add(layout.format(event));
         }
         return Collections.unmodifiableList(eventStrings);
     }
 
-    public static void printLogs() {
-        for (LoggingEvent event : LoggingEvents) {
-            System.out.println("layout.toSerializable(event).toString()");
-        }
-        LoggingEvents.clear();
-    }
+    /* Inherited Methods */
 
+    @Override
     public void setLayout(Layout layout) {
         MemAppender.layout = layout;
     }
 
-
-
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'close'");
+        // Clean up resources
+        if (loggingEvents != null) {
+            loggingEvents.clear();
+        }
     }
 
     @Override
     public boolean requiresLayout() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'requiresLayout'");
+        return false; // MemAppender can work without a layout
     }
 
     @Override
     protected void append(LoggingEvent event) {
         addLoggingEvent(event);
     }
-
-
 }
