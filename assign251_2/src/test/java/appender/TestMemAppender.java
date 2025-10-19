@@ -18,5 +18,7 @@ public class TestMemAppender
         assertSame(instance1, instance2);
     }
 
+    // Add test for adding log events and max size
+    
 
 }
