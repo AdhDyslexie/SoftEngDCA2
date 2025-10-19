@@ -1,19 +1,17 @@
 package appender;
 
 import java.io.Serializable;
-import org.apache.logging.log4j.core.Layout;
-import org.apache.logging.log4j.core.LogEvent;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import java.io.StringWriter;
-// import java.util.logging.Logger;
 
-import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.log4j.Layout;
+import org.apache.log4j.spi.LoggingEvent;
 
 // Needs to integrate with both built in appenders and custom MemAppender
 
-public class VelocityLayout { // implements Layout<String> {
+public class VelocityLayout extends Layout {
 
     private VelocityEngine velocityEngine;
 
@@ -22,14 +20,25 @@ public class VelocityLayout { // implements Layout<String> {
         velocityEngine.init();
     }
 
-    public String render(LogEvent event) {
-        Template template = velocityEngine.getTemplate("logEvent.vm");
-        VelocityContext context = new VelocityContext();
-        context.put("event", event);
-        StringWriter writer = new StringWriter();
-        template.merge(context, writer);
-        return writer.toString();
+    @Override
+    public void activateOptions() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'activateOptions'");
     }
+
+    @Override
+    public String format(LoggingEvent event) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'format'");
+    }
+
+    @Override
+    public boolean ignoresThrowable() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'ignoresThrowable'");
+    }
+
+  
 
     
 }

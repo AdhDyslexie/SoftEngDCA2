@@ -2,22 +2,22 @@ package appender;
 
 import java.io.Serializable;
 
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.ErrorHandler;
-import org.apache.logging.log4j.core.Layout;
-import org.apache.logging.log4j.core.LogEvent;
+
  
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
-import org.apache.logging.log4j.core.appender.AbstractAppender;
 
-public class MemAppender extends AbstractAppender
+import org.apache.log4j.*;
+import org.apache.log4j.spi.LoggingEvent;
+
+
+public class MemAppender extends AppenderSkeleton
 {
     private static int maxSize = 100;
     private static long discardedLogsCount = 0;
-    private static List<LogEvent> logEvents;
-    private static Layout<? extends Serializable> layout;
+    private static List<LoggingEvent> LoggingEvents;
+    private static Layout layout;
     
     private static MemAppender instance = new MemAppender();
 
@@ -26,7 +26,6 @@ public class MemAppender extends AbstractAppender
     }
 
     private MemAppender() throws IllegalCallerException {
-        super("MemAppender", null, null, true, null);
         if(instance != null) {
             throw new IllegalCallerException("MemAppender instance already exists!");
         }
@@ -52,27 +51,27 @@ public class MemAppender extends AbstractAppender
         setDiscardedLogsCount(0);
     }
 
-    public static void setLogEvents(List<LogEvent> logEvents) {
-        MemAppender.logEvents = logEvents;
+    public static void setLoggingEvents(List<LoggingEvent> LoggingEvents) {
+        MemAppender.LoggingEvents = LoggingEvents;
     }
 
-    public static List<LogEvent> getLogEvents() {
-        return logEvents;
+    public static List<LoggingEvent> getLoggingEvents() {
+        return LoggingEvents;
     }
 
 
-    public static void addLogEvent(LogEvent logEvent) {
-        if(logEvents.size() >= maxSize) {
+    public static void addLoggingEvent(LoggingEvent LoggingEvent) {
+        if(LoggingEvents.size() >= maxSize) {
             // Remove oldest log event and count as discarded
-            logEvents.remove(0);
+            LoggingEvents.remove(0);
             discardedLogsCount++;
         }
-        logEvents.add(logEvent);
+        LoggingEvents.add(LoggingEvent);
     }
 
     // Not sure if needs to check for null List
-    public static List<LogEvent> getCurrentLogs() {
-        return Collections.unmodifiableList(logEvents);
+    public static List<LoggingEvent> getCurrentLogs() {
+        return Collections.unmodifiableList(LoggingEvents);
     }
 
     public static List<String> getEventStrings() throws IllegalStateException {
@@ -80,30 +79,41 @@ public class MemAppender extends AbstractAppender
             throw new IllegalStateException("Layout is not set");
         }
         List<String> eventStrings = new ArrayList<>();
-        for (LogEvent event : logEvents) {
-            eventStrings.add(layout.toSerializable(event).toString());
+        for (LoggingEvent event : LoggingEvents) {
+            eventStrings.add("layout.toSerializable(event).toString()");
         }
         return Collections.unmodifiableList(eventStrings);
     }
 
     public static void printLogs() {
-        for (LogEvent event : logEvents) {
-            System.out.println(layout.toSerializable(event).toString());
+        for (LoggingEvent event : LoggingEvents) {
+            System.out.println("layout.toSerializable(event).toString()");
         }
-        logEvents.clear();
+        LoggingEvents.clear();
     }
-    
-    public static void setLayout(Layout<? extends Serializable> layout) {
+
+    public void setLayout(Layout layout) {
         MemAppender.layout = layout;
     }
 
 
+
     @Override
-    public void append(LogEvent event) {
-        addLogEvent(event);
+    public void close() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'close'");
     }
 
+    @Override
+    public boolean requiresLayout() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'requiresLayout'");
+    }
 
+    @Override
+    protected void append(LoggingEvent event) {
+        addLoggingEvent(event);
+    }
 
 
 }

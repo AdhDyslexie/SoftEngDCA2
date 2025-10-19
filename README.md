@@ -2,7 +2,11 @@
 
 # Project notes
 
-- My notes will go here
+- Well that was a waste of half a day ╰（‵□′）╯
+  - Honestly fuck log4j2 its too convoluted 
+
+# Resources
+
 
 
 <br>

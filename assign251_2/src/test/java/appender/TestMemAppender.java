@@ -1,12 +1,9 @@
 package appender;
 
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.*;
 
-import org.junit.jupiter.api.Test;
 
-/**
- * Unit test for simple App.
- */
 public class TestMemAppender 
 {
 
@@ -18,7 +15,5 @@ public class TestMemAppender
         assertSame(instance1, instance2);
     }
 
-    // Add test for adding log events and max size
-    
 
 }

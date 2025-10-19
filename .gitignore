@@ -19,4 +19,5 @@ target/
 # Ignore test files
 
 ## This is a main file to test random things i needed reminding on how they worked
-assign251_2/src/main/java/appender/Test.java
+Test.java
+FailedMemAppender.java
