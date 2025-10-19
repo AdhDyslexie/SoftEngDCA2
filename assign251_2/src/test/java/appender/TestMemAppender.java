@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.jupiter.api.*;
+import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.Level;
