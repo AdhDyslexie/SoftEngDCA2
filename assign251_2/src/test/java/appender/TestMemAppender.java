@@ -112,4 +112,22 @@ public class TestMemAppender
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void TestVelocityLayoutIntegration() {
+        MemAppender appender = MemAppender.getInstance();
+        VelocityLayout layout = new VelocityLayout("[$p] $c: $m");
+        appender.setLayout(layout);
+        
+        Logger logger = Logger.getLogger("TestLogger");
+        logger.addAppender(appender);
+        logger.setLevel(Level.INFO);
+        
+        logger.info("Velocity test message");
+
+        List<String> eventStrings = MemAppender.getEventStrings();
+        String expected = new String("[INFO] TestLogger: Velocity test message");
+        String actual = new String(eventStrings.get(0));
+        assertEquals(expected, actual);
+    }
+
 }

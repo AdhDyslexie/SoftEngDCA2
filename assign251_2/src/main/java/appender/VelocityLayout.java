@@ -21,6 +21,19 @@ public class VelocityLayout extends Layout {
     private static final String TEMPLATE = "src/main/resources/variableLogTemplate.vm";
 
 
+    /**
+     * Constructor for VelocityLayout. Initializes the Velocity engine and sets the pattern.
+     * @param pattern The pattern to use for formatting log messages.
+     * Can be any of:
+     * <ul>
+     *   <li><code>$c</code> (logger name)</li>
+     *   <li><code>$p</code> (log level)</li>
+     *   <li><code>$m</code> (message)</li>
+     *   <li><code>$t</code> (thread name)</li>
+     *   <li><code>$d</code> (date)</li>
+     *   <li><code>$n</code> (new line)</li>
+     * </ul>
+     */
     public VelocityLayout(String pattern) {
         setPattern(pattern);
         velocityEngine = new VelocityEngine();
@@ -57,7 +70,7 @@ public class VelocityLayout extends Layout {
         context.put("m", event.getMessage());
         context.put("t", event.getThreadName());
         context.put("n", '\n');
-        
+
         Date date = new Date(event.getTimeStamp());
         context.put("d", date.toString());
 
