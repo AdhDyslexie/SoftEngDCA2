@@ -26,6 +26,12 @@
       <version>5.14.0</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>5.14.0</version>
+      <scope>test</scope>
+    </dependency>
     
     <!-- Apache Velocity for templating -->
     <dependency>
@@ -61,7 +67,12 @@
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.1</version>
+          <version>3.0.0</version>
+          <configuration>
+            <includes>
+              <include>**/*Test*.java</include>
+            </includes>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>

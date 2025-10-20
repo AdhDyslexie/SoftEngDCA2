@@ -83,14 +83,12 @@ public class VelocityLayout extends Layout {
 
     @Override
     public boolean ignoresThrowable() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'ignoresThrowable'");
+        return true;
     }
 
     @Override
     public void activateOptions() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'activateOptions'");
+        // No options to activate
     }
 
     
