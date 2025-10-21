@@ -17,6 +17,8 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.FileAppender;
+import java.io.IOException;
 
 public class StressTest {
     
@@ -132,7 +134,44 @@ public class StressTest {
         logsForPerformanceTest(maxSize, logger);
        
         endTime = System.currentTimeMillis();
-        long duration = endTime - startTime; // account for sleeping thread if JConsole monitoring is enabled
+        long duration = endTime - startTime; // TODO: account for sleeping thread if JConsole monitoring is enabled
+        System.out.printf("\tFinal stats:%n");
+        System.out.printf("\t\tApproximate test duration: %d ms%n", duration);
+        System.out.println("\n");
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 10, 100, 1000, 10000, 100000, 1000000})
+    public void testFileAppender(int maxSize) {
+
+        startTime = System.currentTimeMillis();
+
+        // Set up Logger
+        Logger logger = Logger.getLogger("FileLogger");
+        try {
+            logger.addAppender(
+                new FileAppender(
+                    new SimpleLayout(),
+                    "test.log"
+                )
+            );
+            logger.setLevel(Level.INFO);
+            
+        } 
+        catch (IOException e) {
+            System.err.println("Failed to create FileAppender: " + e.getMessage());
+        }
+        catch (Exception e) {
+            System.err.println("Something went wrong 😢: " + e.getMessage());
+        }
+
+        System.out.printf("=== File Appender Performance Test - (%d) ===%n ", maxSize);
+        System.err.printf("=== File Appender Performance Test - (%d) ===%n ", maxSize); // Will still output to console when redirecting console output to a file
+
+        logsForPerformanceTest(maxSize, logger);
+
+        endTime = System.currentTimeMillis();
+        long duration = endTime - startTime; // TODO: account for sleeping thread if JConsole monitoring is enabled
         System.out.printf("\tFinal stats:%n");
         System.out.printf("\t\tApproximate test duration: %d ms%n", duration);
         System.out.println("\n");
@@ -178,7 +217,7 @@ public class StressTest {
         logsForPerformanceTest(maxSize, logger);
     
         endTime = System.currentTimeMillis();
-        long duration = endTime - startTime; // account for sleeping thread if JConsole monitoring is enabled
+        long duration = endTime - startTime; // TODO: account for sleeping thread if JConsole monitoring is enabled
 
         System.out.printf("\tFinal stats:%n");
         System.out.printf("\t\tApproximate test duration: %d ms%n", duration);
