@@ -68,36 +68,59 @@ public class StressTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {1, 10, 100, 1000, 10000, 1000000})
+    @ValueSource(ints = {1, 10, 100, 1000, 10000, 100000, 1000000})
     public void testMemAppenderWithArrayList(int maxSize) {
 
-        // System.err.printf("Test name: testMemAppenderWithArrayList (%d)%n", maxSize);
-        System.err.printf("=== MemAppender With ArrayList Performance Test - (%d) ===%n ", maxSize);
-        
         // Set up MemAppender
         memAppender = MemAppender.getInstance();
         memAppender.setMaxSize(maxSize);
         memAppender.setLoggingEvents(new ArrayList<LoggingEvent>());
-
+        
         // Set up Logger
         Logger logger = Logger.getLogger("ArrayListLogger");
         logger.addAppender(memAppender);
         logger.setLevel(Level.INFO);
+        
+        System.out.printf("=== MemAppender With ArrayList Performance Test - (%d) ===%n ", maxSize);
+        System.err.printf("=== MemAppender With ArrayList Performance Test - (%d) ===%n ", maxSize); // Will still output to console when redirecting console output to a file
 
+        testMemAppenderWithDataStucts(maxSize, logger, memAppender);
+    }
 
+    @ParameterizedTest
+    @ValueSource(ints = {1, 10, 100, 1000, 10000, 100000, 1000000})
+    public void testMemAppenderWithLinkedList(int maxSize) {
+
+        // Set up MemAppender
+        memAppender = MemAppender.getInstance();
+        memAppender.setMaxSize(maxSize);
+        memAppender.setLoggingEvents(new LinkedList<LoggingEvent>());
+        
+        // Set up Logger
+        Logger logger = Logger.getLogger("LinkedListLogger");
+        logger.addAppender(memAppender);
+        logger.setLevel(Level.INFO);
+
+        System.out.printf("=== MemAppender With LinkedList Performance Test - (%d) ===%n ", maxSize);
+        System.err.printf("=== MemAppender With LinkedList Performance Test - (%d) ===%n ", maxSize); // Will still output to console when redirecting console output to a file
+
+        testMemAppenderWithDataStucts(maxSize, logger, memAppender);
+    }
+
+    private void testMemAppenderWithDataStucts(int maxSize, Logger logger, MemAppender memAppender) {
+    
         startTime = System.currentTimeMillis();
 
-        
-        // 1. 
+        // 1.
         printPerformanceInfo("Before logging");
-
+    
         for (int i = 0; i < maxSize; i++) {
             logger.info("Info message " + i);
         }
         
         // 2. 
         printPerformanceInfo("Inbetween logging (After MaxSize reached, before overflow)");
-
+    
         // Additional logs to exceed maxSize and test discarding
         int moreLogs = Math.max(NUMBER_OF_LOGS, maxSize / 2); 
         for (int i = 0; i < moreLogs; i++) {
@@ -106,25 +129,22 @@ public class StressTest {
         
         // 3.
         printPerformanceInfo("After logging");
-
-
+    
+    
         endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
         System.out.printf("\tFinal stats:%n");
-        System.out.printf("\t\tApprox Test duration: %d ms%n", duration);
+        System.out.printf("\t\tApproximate test duration: %d ms%n", duration);
         System.out.printf("\t\tLogs processed: %d%n", maxSize + moreLogs);
         System.out.printf("\t\tLogs stored: %d%n", memAppender.getCurrentLogs().size());
         System.out.printf("\t\tLogs discarded: %d%n", memAppender.getDiscardedLogsCount());
         System.out.println("\n");
-
-
+    
+    
         // Verify that logs are stored correctly
         assertTrue(memAppender.getCurrentLogs().size() > 0);
         assertTrue(memAppender.getCurrentLogs().size() <= maxSize, "Number of stored logs should not exceed maxSize");
-
     }
-
-
 
     private void printPerformanceInfo(String phase) {
 

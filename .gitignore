@@ -15,6 +15,8 @@ target/
 *.swo
 *.bak
 *.tmp
+### velocity template files (they are auto generated in this project)
+*.vm 
 
 # Ignore test files
 
