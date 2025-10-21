@@ -8,13 +8,14 @@ import org.apache.log4j.spi.LoggingEvent;
 
 public class MemAppender extends AppenderSkeleton {
 
+    private static MemAppender instance;
+    
+    private static List<LoggingEvent> loggingEvents;
+    private static Layout memLayout;
     private static int maxSize;
     private static final int DEFAULT_MAX_SIZE = 100;
     private static long discardedLogsCount;
-    private static List<LoggingEvent> loggingEvents;
-    private static Layout memLayout;
     
-    private static MemAppender instance;
 
 
     // Default constructor for singleton
@@ -89,14 +90,31 @@ public class MemAppender extends AppenderSkeleton {
     ###############
     */
 
-    public static void resetAppender()
+    /**
+     * Reset the class fields but keep the singleton instance
+     */
+    public static void resetAppenderFields()
     {
         if (loggingEvents != null) {
             loggingEvents.clear();
         }
-        resetDiscardedLogsCount();
+        memLayout = null;
         maxSize = DEFAULT_MAX_SIZE;
+        resetDiscardedLogsCount();
+    }
+
+    /**
+     * Reset the singleton class instance and its fields
+     */
+    public static void resetAppender()
+    {
+        instance = null;
+        if (loggingEvents != null) {
+            loggingEvents.clear();
+        }
         memLayout = null; // getLayout();
+        maxSize = DEFAULT_MAX_SIZE;
+        resetDiscardedLogsCount();
     }
 
     public static void resetDiscardedLogsCount() {
