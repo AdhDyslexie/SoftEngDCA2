@@ -2,17 +2,21 @@ package appender;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// import java.io.Console;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
-import java.util.Date;
+// import java.util.Date;
+// import java.util.Enumeration;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.apache.log4j.Logger;
+import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
+import org.apache.log4j.SimpleLayout;
 
 public class StressTest {
     
@@ -107,9 +111,39 @@ public class StressTest {
         testMemAppenderWithDataStucts(maxSize, logger, memAppender);
     }
 
-    private void testMemAppenderWithDataStucts(int maxSize, Logger logger, MemAppender memAppender) {
-    
+    @ParameterizedTest
+    @ValueSource(ints = {1, 10, 100, 1000, 10000, 100000, 1000000})
+    public void testConsoleAppender(int maxSize) {
+
         startTime = System.currentTimeMillis();
+
+        // Set up Logger
+        Logger logger = Logger.getLogger("ConsoleLogger");
+        logger.addAppender(
+            new ConsoleAppender(
+                new SimpleLayout()
+            )
+        );
+        logger.setLevel(Level.INFO);
+
+        System.out.printf("=== Console Appender Performance Test - (%d) ===%n ", maxSize);
+        System.err.printf("=== Console Appender Performance Test - (%d) ===%n ", maxSize); // Will still output to console when redirecting console output to a file
+
+        logsForPerformanceTest(maxSize, logger);
+       
+        endTime = System.currentTimeMillis();
+        long duration = endTime - startTime; // account for sleeping thread if JConsole monitoring is enabled
+        System.out.printf("\tFinal stats:%n");
+        System.out.printf("\t\tApproximate test duration: %d ms%n", duration);
+        System.out.println("\n");
+    }
+
+    /**
+     * Log messages for performance tests
+     * @param maxSize
+     * @param logger
+     */
+    private void logsForPerformanceTest(int maxSize, Logger logger) {
 
         // 1.
         printPerformanceInfo("Before logging");
@@ -129,13 +163,26 @@ public class StressTest {
         
         // 3.
         printPerformanceInfo("After logging");
+    }
+
+    /**
+     * Test MemAppender performance with specified data structure
+     * @param maxSize
+     * @param logger
+     * @param memAppender
+     */
+    private void testMemAppenderWithDataStucts(int maxSize, Logger logger, MemAppender memAppender) {
     
+        startTime = System.currentTimeMillis();
+
+        logsForPerformanceTest(maxSize, logger);
     
         endTime = System.currentTimeMillis();
-        long duration = endTime - startTime;
+        long duration = endTime - startTime; // account for sleeping thread if JConsole monitoring is enabled
+
         System.out.printf("\tFinal stats:%n");
         System.out.printf("\t\tApproximate test duration: %d ms%n", duration);
-        System.out.printf("\t\tLogs processed: %d%n", maxSize + moreLogs);
+        System.out.printf("\t\tLogs processed: %d%n", maxSize + memAppender.getDiscardedLogsCount());
         System.out.printf("\t\tLogs stored: %d%n", memAppender.getCurrentLogs().size());
         System.out.printf("\t\tLogs discarded: %d%n", memAppender.getDiscardedLogsCount());
         System.out.println("\n");
