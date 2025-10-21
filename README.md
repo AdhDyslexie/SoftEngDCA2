@@ -106,7 +106,12 @@ Implementation details:
 
 
 - **a.** Create a separate test class for stress tests. 
-- **b.** Use these tests to compare the performance between `MemAppender` using a `LinkedList`, `MemAppender` using an `ArrayList`, `ConsoleAppender` and `FileAppender` 
+- **b.** Use these tests to compare the performance 
+	- Between:
+		- `MemAppender` using a `LinkedList`
+		- `MemAppender` using an `ArrayList`
+		- `ConsoleAppender`
+		- `FileAppender` 
 	- Measure time and memory consumption (using `JConsole` or `VisualVM` or any profiler) 
 - **c.** Consider how to output your logs in such a way that makes comparisons between the `MemAppender` and other appenders sensible. 
 - **d.** Use these scripts to compare the performance between `PatternLayout` and `VelocityLayout` 
