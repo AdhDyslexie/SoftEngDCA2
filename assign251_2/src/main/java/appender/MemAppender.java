@@ -22,6 +22,7 @@ public class MemAppender extends AppenderSkeleton {
     private MemAppender() {
         maxSize = DEFAULT_MAX_SIZE;
         discardedLogsCount = 0;
+        loggingEvents = new ArrayList<>();
     }
 
 
