@@ -27,8 +27,6 @@ public class StressTest {
     private static final int NUMBER_OF_LOGS = 10000;
     private MemAppender memAppender;
     private static final boolean ENABLE_JCONSOLE_MONITORING = false; // Toggle for JConsole mode
-    private static long startTime;
-    private static long endTime;
 
 
     @BeforeAll
@@ -51,10 +49,6 @@ public class StressTest {
                 Thread.currentThread().interrupt();
             }
         }
-    }
-
-    @BeforeEach
-    public void setUp() {
     }
 
     @AfterEach
@@ -99,17 +93,14 @@ public class StressTest {
 
     @Test
     public void testPatternLayout() {
-
         Layout patternLayout = new PatternLayout("%d{ISO8601} [%t] %-5p %c %x - %m%n");
-        setUpAndRunLayout(patternLayout, "PatternLayout");
+        runLayoutTest(patternLayout, "PatternLayout");
     }
 
     @Test
     public void testVelocityLayout() {
-
         VelocityLayout velocityLayout = new VelocityLayout("[$p] $c: $m");
-        setUpAndRunLayout(velocityLayout, "VelocityLayout");
-        
+        runLayoutTest(velocityLayout, "VelocityLayout");
     }
 
 
@@ -131,7 +122,7 @@ public class StressTest {
         System.out.printf("=== %s Performance Test - (%d) ===%n ", prompt, maxSize);
         System.err.printf("=== %s Performance Test - (%d) ===%n ", prompt, maxSize); // Will still output to console when redirecting console output to a file
 
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
 
         // Set up MemAppender
         memAppender = MemAppender.getInstance();
@@ -141,15 +132,17 @@ public class StressTest {
             memAppender.setLayout(patternLayout);
         }
         
-        // Set up Logger
-        Logger logger = Logger.getLogger("MemLogger");
-        logger.addAppender(memAppender);
-        logger.setLevel(Level.INFO);
+        Logger logger = Logger.getLogger("MemLogger"); 
+        if(maxSize <= 1) // Set up Logger once
+        {
+            logger.addAppender(memAppender);
+            logger.setLevel(Level.INFO);
+        }
         
         logsForPerformanceTest(maxSize, logger);
 
-        Long endTime = System.currentTimeMillis();
-        long duration = endTime - startTime; // TODO: account for sleeping thread if JConsole monitoring is enabled
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
 
         System.out.printf("\tFinal stats:%n");
         System.out.printf("\t\tApproximate test duration: %d ms%n", duration);
@@ -171,14 +164,12 @@ public class StressTest {
     private void setUpAndRunConsoleAppender(int maxSize, Layout layout) {
         long startTime = System.currentTimeMillis();
 
-        // Set up Logger
         Logger logger = Logger.getLogger("ConsoleLogger");
-        logger.addAppender(
-            new ConsoleAppender(
-                layout
-            )
-        );
-        logger.setLevel(Level.INFO);
+        if(maxSize <= 1) // Set up Logger once
+        {
+            logger.addAppender(new ConsoleAppender(layout));
+            logger.setLevel(Level.INFO);
+        }
 
         System.out.printf("=== Console Appender Performance Test - (%d) ===%n ", maxSize);
         System.err.printf("=== Console Appender Performance Test - (%d) ===%n ", maxSize); // Will still output to console when redirecting console output to a file
@@ -186,7 +177,7 @@ public class StressTest {
         logsForPerformanceTest(maxSize, logger);
        
         long endTime = System.currentTimeMillis();
-        long duration = endTime - startTime; // TODO: account for sleeping thread if JConsole monitoring is enabled
+        long duration = endTime - startTime;
         System.out.printf("\tFinal stats:%n");
         System.out.printf("\t\tApproximate test duration: %d ms%n", duration);
         System.out.println("\n");
@@ -200,20 +191,22 @@ public class StressTest {
     private void setUpAndRunFileAppender(int maxSize, Layout layout) {
         long startTime = System.currentTimeMillis();
 
-        // Set up Logger
         Logger logger = Logger.getLogger("FileLogger");
-        try {
-            logger.addAppender(
-                new FileAppender(
-                    layout,
-                    "logs/test.log"
-                )
-            );
-            logger.setLevel(Level.INFO);
-        } catch (IOException e) {
-            System.err.println("Failed to create FileAppender: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("Something went wrong 😢: " + e.getMessage());
+        if(maxSize <= 1) // Set up Logger once
+        {
+            try {
+                logger.addAppender(
+                    new FileAppender(
+                        layout,
+                        "logs/test.log"
+                    )
+                );
+                logger.setLevel(Level.INFO);
+            } catch (IOException e) {
+                System.err.println("Failed to create FileAppender: " + e.getMessage());
+            } catch (Exception e) {
+                System.err.println("Something went wrong 😢: " + e.getMessage());
+            }
         }
 
         System.out.printf("=== File Appender Performance Test - (%d) ===%n ", maxSize);
@@ -222,7 +215,7 @@ public class StressTest {
         logsForPerformanceTest(maxSize, logger);
 
         long endTime = System.currentTimeMillis();
-        long duration = endTime - startTime; // TODO: account for sleeping thread if JConsole monitoring is enabled
+        long duration = endTime - startTime;
         System.out.printf("\tFinal stats:%n");
         System.out.printf("\t\tApproximate test duration: %d ms%n", duration);
         System.out.println("\n");
@@ -233,7 +226,7 @@ public class StressTest {
      * @param layout specifed for use
      * @param prompt for identifying the test
      */
-    private void setUpAndRunLayout(Layout layout, String prompt) {
+    private void runLayoutTest(Layout layout, String prompt) {
         int[] sizes = {1, 10, 100, 1000, 10000, 100000, 1000000};
         long sleep = 100;
 

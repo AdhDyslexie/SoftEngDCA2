@@ -15,10 +15,10 @@ import org.apache.log4j.spi.LoggingEvent;
 
 public class VelocityLayout extends Layout {
 
+    private static final String TEMPLATE = "src/main/resources/variableLogTemplate.vm";
     private VelocityEngine velocityEngine;
     private Template tmpl;
     private String pattern;
-    private static final String TEMPLATE = "src/main/resources/variableLogTemplate.vm";
 
 
     /**
@@ -35,21 +35,32 @@ public class VelocityLayout extends Layout {
      * </ul>
      */
     public VelocityLayout(String pattern) {
-        setPattern(pattern);
         velocityEngine = new VelocityEngine();
         velocityEngine.init();
+        setPattern(pattern);
     }
 
-    /**
-     * @brief Set the pattern for the layout & create/update the template file
-     * @param pattern
-     */
+    private void updateTmpl() {
+        tmpl = velocityEngine.getTemplate(TEMPLATE);
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
     public void setPattern(String pattern) {
         this.pattern = pattern;
+        createTemplateFile();
+        updateTmpl();
+    }
+    
+    /**
+     * Write the pattern to the template file
+     */
+    public void createTemplateFile() {
         try {
             // Test if file is accessible
             FileWriter fileWriter = new FileWriter(TEMPLATE);
-            fileWriter.write(pattern);
+            fileWriter.write(getPattern());
             fileWriter.close();
         } 
         catch (IOException e) {
@@ -57,12 +68,12 @@ public class VelocityLayout extends Layout {
         } catch (Exception e) {
             System.err.println("Error accessing template file: " + e.getMessage());
         }
+
     }
     
 
     @Override
     public String format(LoggingEvent event) {
-        tmpl = velocityEngine.getTemplate(TEMPLATE);
         VelocityContext context = new VelocityContext();
 
         context.put("c", event.getLoggerName());
