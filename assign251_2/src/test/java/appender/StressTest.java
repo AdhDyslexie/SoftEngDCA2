@@ -44,6 +44,7 @@ public class StressTest {
             System.out.println("3. Go to Memory tab to monitor heap usage");
             System.out.println("4. Waiting 10 seconds before starting tests...");
             try {
+                System.err.println("Pausing 10 seconds for JConsole to attach...");
                 Thread.sleep(10000); // 10 seconds
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -60,6 +61,7 @@ public class StressTest {
         if(ENABLE_JCONSOLE_MONITORING)
         {
             try {
+                System.err.println("Pause for 5 seconds after each test...");
                 Thread.sleep(5000); // 5 seconds
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -93,13 +95,13 @@ public class StressTest {
 
     @Test
     public void testPatternLayout() {
-        Layout patternLayout = new PatternLayout("%d{ISO8601} [%t] %-5p %c %x - %m%n");
+        Layout patternLayout = new PatternLayout("%d{ISO8601} [%t] %-5p %c %x - %m"); // No new lines for ease of viewing results
         runLayoutTest(patternLayout, "PatternLayout");
     }
 
     @Test
     public void testVelocityLayout() {
-        VelocityLayout velocityLayout = new VelocityLayout("[$p] $c: $m");
+        VelocityLayout velocityLayout = new VelocityLayout("[$p] $c: $m"); // No new lines for ease of viewing results
         runLayoutTest(velocityLayout, "VelocityLayout");
     }
 

@@ -2,12 +2,9 @@
 
 # Project notes
 
-- Well that was a waste of half a day ╰（‵□′）╯
-  - Honestly fuck log4j2 its too convoluted 
+- The HTML JaCoCo report can be found at `assign251_2\target\site\jacoco` after running `mvn test` 
 
-# Resources
-
-
+- In the pom file the stress tests are excluded as they take a while. PLus id assumed they where solving for stressing the classess at scale, not for testing the program & counting towards code coverage
 
 <br>
 
