@@ -101,62 +101,15 @@ public class StressTest {
     public void testPatternLayout() {
 
         Layout patternLayout = new PatternLayout("%d{ISO8601} [%t] %-5p %c %x - %m%n");
-        int[] sizes = {1, 10, 100, 1000, 10000, 100000, 1000000};
-        
-        System.out.printf("=== PatternLayout Performance Test ===%n ");
-        System.err.printf("=== PatternLayout Performance Test ===%n "); // Will still output to console when redirecting console output to a file
-
-        startTime = System.currentTimeMillis();
-        
-        // Test MemAppender with PatternLayout. Use LinkedList to give MemAppender best chance at performance
-        for (int size : sizes) {
-            setUpAndRunMemAppender(size, new LinkedList<LoggingEvent>(), patternLayout, "MemAppender With PatternLayout");
-        }
-        // Test FileAppender with PatternLayout
-        for (int size : sizes) {
-            setUpAndRunFileAppender(size, patternLayout);
-        }
-        // Test ConsoleAppender with PatternLayout
-        for (int size : sizes) {
-            setUpAndRunConsoleAppender(size, patternLayout);
-        }
-
-        endTime = System.currentTimeMillis();
-        long duration = endTime - startTime; // TODO: account for sleeping thread if JConsole monitoring is enabled
-        System.out.printf("Final stats:%n");
-        System.out.printf("\tApproximate test duration: %d ms%n", duration);
-        System.out.println("\n");
+        setUpAndRunLayout(patternLayout, "PatternLayout");
     }
 
     @Test
     public void testVelocityLayout() {
 
         VelocityLayout velocityLayout = new VelocityLayout("[$p] $c: $m");
-        int[] sizes = {1, 10, 100, 1000, 10000, 100000, 1000000};
-
-        System.out.printf("=== VelocityLayout Performance Test ===%n ");
-        System.err.printf("=== VelocityLayout Performance Test ===%n "); // Will still output to console when redirecting console output to a file
-
-        startTime = System.currentTimeMillis();
+        setUpAndRunLayout(velocityLayout, "VelocityLayout");
         
-        // Test MemAppender with velocityLayout. Use LinkedList to give MemAppender best chance at performance
-        for (int size : sizes) {
-            setUpAndRunMemAppender(size, new LinkedList<LoggingEvent>(), velocityLayout, "MemAppender With VelocityLayout");
-        }
-        // Test FileAppender with velocityLayout
-        for (int size : sizes) {
-            setUpAndRunFileAppender(size, velocityLayout);
-        }
-        // Test ConsoleAppender with velocityLayout
-        for (int size : sizes) {
-            setUpAndRunConsoleAppender(size, velocityLayout);
-        }
-
-        endTime = System.currentTimeMillis();
-        long duration = endTime - startTime; // TODO: account for sleeping thread if JConsole monitoring is enabled
-        System.out.printf("Final stats:%n");
-        System.out.printf("\tApproximate test duration: %d ms%n", duration);
-        System.out.println("\n");
     }
 
 
@@ -276,6 +229,46 @@ public class StressTest {
     }
 
     /**
+     * Set up and run layout performance tests
+     * @param layout specifed for use
+     * @param prompt for identifying the test
+     */
+    private void setUpAndRunLayout(Layout layout, String prompt) {
+        int[] sizes = {1, 10, 100, 1000, 10000, 100000, 1000000};
+        long sleep = 100;
+
+        System.out.printf("=== %s Performance Test ===%n ", prompt);
+        System.err.printf("=== %s Performance Test ===%n ", prompt); // Will still output to console when redirecting console output to a file
+
+        long startTime = System.currentTimeMillis();
+        
+        // Test MemAppender with layout. Use LinkedList to give MemAppender best chance at performance
+        for (int size : sizes) {
+            setUpAndRunMemAppender(size, new LinkedList<LoggingEvent>(), layout, "MemAppender With " + prompt);
+        }
+
+        callGCAndSleep(sleep); // to try & give fair performance
+
+        // Test FileAppender with layout
+        for (int size : sizes) {
+            setUpAndRunFileAppender(size, layout);
+        }
+
+        callGCAndSleep(sleep); // to try & give fair performance
+
+        // Test ConsoleAppender with layout
+        for (int size : sizes) {
+            setUpAndRunConsoleAppender(size, layout);
+        }
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime - (2 * sleep);
+        System.out.printf("Final stats:%n");
+        System.out.printf("\tApproximate test duration: %d ms%n", duration);
+        System.out.println("\n");
+    }
+
+    /**
      * Log messages for performance tests
      * @param maxSize
      * @param logger
@@ -312,6 +305,19 @@ public class StressTest {
         System.out.printf("\t\tUsed Memory: %d MB (%d KB)%n", usedMemory / 1024 / 1024, usedMemory / 1024);
         System.out.printf("\t\tFree Memory: %d MB%n", freeMemory / 1024 / 1024);
         System.out.printf("\t\tTotal Memory: %d MB%n", totalMemory / 1024 / 1024);
+    }
+
+    /**
+     * Call garbage collector and sleep thread for a specified duration
+     * @param sleep time in milliseconds
+     */
+    private void callGCAndSleep(long sleep) {
+        System.gc();
+        try {
+            Thread.sleep(sleep); 
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
 }
