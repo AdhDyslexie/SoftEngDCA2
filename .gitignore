@@ -19,7 +19,9 @@ target/
 *.vm 
 
 # Ignore test files
-
 ## This is a main file to test random things i needed reminding on how they worked
 Test.java
 FailedMemAppender.java
+
+# Ignore log directories
+logs/

@@ -108,7 +108,7 @@ public class StressTest {
 
         startTime = System.currentTimeMillis();
         
-        // Test MemAppender with PatternLayout
+        // Test MemAppender with PatternLayout. Use LinkedList to give MemAppender best chance at performance
         for (int size : sizes) {
             setUpAndRunMemAppender(size, new LinkedList<LoggingEvent>(), patternLayout, "MemAppender With PatternLayout");
         }
@@ -119,6 +119,37 @@ public class StressTest {
         // Test ConsoleAppender with PatternLayout
         for (int size : sizes) {
             setUpAndRunConsoleAppender(size, patternLayout);
+        }
+
+        endTime = System.currentTimeMillis();
+        long duration = endTime - startTime; // TODO: account for sleeping thread if JConsole monitoring is enabled
+        System.out.printf("Final stats:%n");
+        System.out.printf("\tApproximate test duration: %d ms%n", duration);
+        System.out.println("\n");
+    }
+
+    @Test
+    public void testVelocityLayout() {
+
+        VelocityLayout velocityLayout = new VelocityLayout("[$p] $c: $m");
+        int[] sizes = {1, 10, 100, 1000, 10000, 100000, 1000000};
+
+        System.out.printf("=== VelocityLayout Performance Test ===%n ");
+        System.err.printf("=== VelocityLayout Performance Test ===%n "); // Will still output to console when redirecting console output to a file
+
+        startTime = System.currentTimeMillis();
+        
+        // Test MemAppender with velocityLayout. Use LinkedList to give MemAppender best chance at performance
+        for (int size : sizes) {
+            setUpAndRunMemAppender(size, new LinkedList<LoggingEvent>(), velocityLayout, "MemAppender With VelocityLayout");
+        }
+        // Test FileAppender with velocityLayout
+        for (int size : sizes) {
+            setUpAndRunFileAppender(size, velocityLayout);
+        }
+        // Test ConsoleAppender with velocityLayout
+        for (int size : sizes) {
+            setUpAndRunConsoleAppender(size, velocityLayout);
         }
 
         endTime = System.currentTimeMillis();
@@ -222,7 +253,7 @@ public class StressTest {
             logger.addAppender(
                 new FileAppender(
                     layout,
-                    "test.log"
+                    "logs/test.log"
                 )
             );
             logger.setLevel(Level.INFO);
